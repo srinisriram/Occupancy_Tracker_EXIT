@@ -1,10 +1,10 @@
-
 import cv2
-from constants import MIN_CONFIDENCE, CLASSES, MAX_NUM_OF_CONSECUTIVE_FRAMES_FOR_ACTION, MAX_DISTANCE_FROM_THE_OBJECT
-from logger import Logger
+from Occupancy_Tracker.constants import MIN_CONFIDENCE, CLASSES, MAX_NUM_OF_CONSECUTIVE_FRAMES_FOR_ACTION, \
+    MAX_DISTANCE_FROM_THE_OBJECT
+from Occupancy_Tracker.logger import Logger
 import dlib
 import numpy as np
-from centroid_tracker import CentroidTracker
+from Occupancy_Tracker.centroid_tracker import CentroidTracker
 
 
 class CentroidObjectCreator:
@@ -14,13 +14,13 @@ class CentroidObjectCreator:
         self.rects = []
         self.rect = None
         self.objects = None
-        
+
         self.frame = None
         # keep the count of total number of frames
         self.total_frames = 0
         self.ct = CentroidTracker(maxDisappeared=MAX_NUM_OF_CONSECUTIVE_FRAMES_FOR_ACTION,
                                   maxDistance=MAX_DISTANCE_FROM_THE_OBJECT)
-            
+
     def convert_frame_to_detections(self):
         """
         Convert frame to detections.
@@ -40,7 +40,7 @@ class CentroidObjectCreator:
             3. Compute the (x,y) coordinates of the bounding box.
             4. Construct a dlib rectangle object from the bounding box.
             5. Start dlib correlation tracker.
-            6. Append the tracker to the list of trackers. 
+            6. Append the tracker to the list of trackers.
         """
         # loop over the detections
         for i in np.arange(0, detections.shape[2]):
@@ -75,10 +75,10 @@ class CentroidObjectCreator:
         """
         This function does the following:
         1. Computes the tracker and appends it to trackers list.
-        2. Appends the coordinates from trackers to rects list. 
-        3. Updates the object centroids with the newly computed rects list. 
+        2. Appends the coordinates from trackers to rects list.
+        3. Updates the object centroids with the newly computed rects list.
         """
-        
+
         self.H = H
         self.W = W
         self.rgb = rgb

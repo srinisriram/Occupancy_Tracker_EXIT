@@ -1,15 +1,15 @@
 # This file implements the logic to send / receive TCP/IP messages from/to peer IP address.
-
+import sys, traceback
 import socket
 import threading
 import time
-from constants import MAX_OCCUPANCY, SERVER_PORT, MAX_NUMBER_OF_RCV_BYTES
-from logger import Logger
-from play_audio import PlayAudio
-from singleton_template import Singleton
+from Occupancy_Tracker.constants import MAX_OCCUPANCY, SERVER_PORT, MAX_NUMBER_OF_RCV_BYTES
+from Occupancy_Tracker.logger import Logger
+from Occupancy_Tracker.play_audio import PlayAudio
+from Occupancy_Tracker.singleton_template import Singleton
 
 
-class SendReceiveMessages(metaclass=Singleton):
+class SendReceiveMessages:
     """
     This class is used for sending and receiving messages over TCP/IP socket from/to peer Ip address.
     """
@@ -106,6 +106,8 @@ class SendReceiveMessages(metaclass=Singleton):
         :return:
         """
         self.__total_faces_detected_locally += 1
+        Logger.logger().info("Incrementing the total faces detected locally to {}.".format(
+            self.__total_faces_detected_locally))
 
     def decrement_face_detected_locally(self):
         """
@@ -113,6 +115,8 @@ class SendReceiveMessages(metaclass=Singleton):
         :return:
         """
         self.__total_faces_detected_locally -= 1
+        Logger.logger().info("Decrementing the total faces detected locally to {}.".format(
+            self.__total_faces_detected_locally))
 
     def get_face_detected_by_peer(self):
         """
@@ -131,6 +135,8 @@ class SendReceiveMessages(metaclass=Singleton):
         return self.__total_faces_detected_by_peer
 
     def reset_count_variables(self):
+        Logger.logger().info("Reseting __total_faces_detected_locally, __total_faces_detected_by_peer, "
+                             "total_faces_detected counts to 0.")
         self.__total_faces_detected_locally = 0
         self.__total_faces_detected_by_peer = 0
         self.total_faces_detected = 0
@@ -145,6 +151,8 @@ class SendReceiveMessages(metaclass=Singleton):
         # Create a TCP/IP socket
         # Connect the socket to the port where the server is listening
         peer_server_address = (peer_ip_address, peer_port)
+        if not peer_ip_address or not len(peer_ip_address):
+            return
         successfully_connected_to_peer = False
         while SendReceiveMessages.run_program and not successfully_connected_to_peer:
             try:
@@ -156,6 +164,11 @@ class SendReceiveMessages(metaclass=Singleton):
                     self.__send_face_detected_count_via_socket(s, peer_server_address)
             except Exception as e:
                 Logger.logger().error(type(e).__name__ + ': ' + str(e))
+                print("Exception in user code:")
+                print("-" * 60)
+                traceback.print_exc(file=sys.stdout)
+                print("-" * 60)
+                return_value = False
                 time.sleep(1)
 
     def __send_face_detected_count_via_socket(self, sock, peer_server_address):

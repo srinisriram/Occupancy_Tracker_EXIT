@@ -5,9 +5,9 @@ from pathlib import Path
 import cv2
 from imutils.io import TempFile
 
-from constants import SEND_EMAIL, ENTER_LOG_FILE_NAME, EXIT_LOG_FILE_NAME, Direction
-from logger import Logger
-from send_receive_messages import SendReceiveMessages
+from Occupancy_Tracker.constants import SEND_EMAIL, ENTER_LOG_FILE_NAME, EXIT_LOG_FILE_NAME, Direction
+from Occupancy_Tracker.logger import Logger
+from Occupancy_Tracker.send_receive_messages import SendReceiveMessages
 
 
 class HumanValidator:
@@ -40,7 +40,7 @@ class HumanValidator:
             cls.exit_log_file.write("Year,Month,Day,Time,Direction\n")
 
     @classmethod
-    def validate_column_movement(cls, trackable_object, time_stamp, frame, objectID):
+    def validate_column_movement(cls, trackable_object, time_stamp, frame, objectID, send_recv_msg_instance):
         # Initialize log file.
         if not cls.enter_log_file or not cls.exit_log_file or not cls.weekly_log_file or not cls.monthly_log_file:
             cls.initialize_log_file()
@@ -84,11 +84,11 @@ class HumanValidator:
             if trackable_object.direction == Direction.ENTER:
                 cls.enter_log_file.write(info)
                 cls.enter_log_file.flush()
-                SendReceiveMessages().increment_face_detected_locally()
+                send_recv_msg_instance.increment_face_detected_locally()
             elif trackable_object.direction == Direction.EXIT:
                 cls.exit_log_file.write(info)
                 cls.exit_log_file.flush()
-                SendReceiveMessages().decrement_face_detected_locally()
+                send_recv_msg_instance.decrement_face_detected_locally()
 
             # set the object has logged
             trackable_object.logged = True

@@ -1,10 +1,10 @@
 from datetime import datetime
 
 import cv2
-from constants import Direction, COLUMN, TIMEOUT_FOR_TRACKER, MIN_DIST_TRAVELED 
-from human_tracker import HumanTracker
-from human_validator import HumanValidator
-from logger import Logger
+from Occupancy_Tracker.constants import Direction, COLUMN, TIMEOUT_FOR_TRACKER, MIN_DIST_TRAVELED
+from Occupancy_Tracker.human_tracker import HumanTracker
+from Occupancy_Tracker.human_validator import HumanValidator
+from Occupancy_Tracker.logger import Logger
 
 
 class HumanTrackerHandler:
@@ -44,7 +44,8 @@ class HumanTrackerHandler:
         del (cls.human_tracking_dict[objectID])
 
     @classmethod
-    def handle_the_case_where_grace_time_for_tracking_is_over(cls, now, human_tracker_object, keep_dict_items):
+    def handle_the_case_where_grace_time_for_tracking_is_over(cls, now, human_tracker_object, send_recv_msg_instance,
+                                                              keep_dict_items):
         """
         This method handles the case where the grace time (TIMEOUT_FOR_TRACKER) for the tracker object is over.
         :param now: timestamp
@@ -67,10 +68,10 @@ class HumanTrackerHandler:
         Logger.logger().debug("Perform logging for objectId {} found the human_tracking_dict.".format(
             human_tracker_object.objectID))
         HumanValidator.validate_column_movement(human_tracker_object, now, None,
-                                                human_tracker_object.objectID)
+                                                human_tracker_object.objectID, send_recv_msg_instance)
 
     @classmethod
-    def compute_direction_for_dangling_object_ids(cls, keep_dict_items=False):
+    def compute_direction_for_dangling_object_ids(cls, send_recv_msg_instance, keep_dict_items=False):
         """
         This method computes direction for dangling objects found in speed_tracking_dict.
         This can happen when the person was tracked only at a few sampling points (column traversal).
@@ -80,7 +81,8 @@ class HumanTrackerHandler:
             now = datetime.now()
             duration = now - human_tracker_object.timestamp_list[-1]
             if duration.total_seconds() > TIMEOUT_FOR_TRACKER:
-                cls.handle_the_case_where_grace_time_for_tracking_is_over(now, human_tracker_object, keep_dict_items)
+                cls.handle_the_case_where_grace_time_for_tracking_is_over(now, human_tracker_object,
+                                                                          send_recv_msg_instance, keep_dict_items)
 
     @classmethod
     def compute_direction(cls, trackable_object):
